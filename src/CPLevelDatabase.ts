@@ -3,6 +3,7 @@
  */
 
 import { CPLevelConfig } from '../dist/CPLevelConfig.js';
+import { CPLevelMapping } from './CPLevelMapping.js';
 
 class CPLevelDatabase {
     dirty = false;
@@ -13,9 +14,9 @@ class CPLevelDatabase {
     this.homePath = homePath;
   }
 
-  generate(ignoreList: Array<RegExp>) {
+  generate(mapping: CPLevelMapping) {
     this.homeConfig = new CPLevelConfig(undefined);
-    this.homeConfig.generateBaseConfig(this.homePath, ignoreList);
+    this.homeConfig.generateBaseConfig(this.homePath, mapping);
     // TODO apply more complex metadata to the base config
     this.dirty = true;
   }
@@ -28,8 +29,9 @@ class CPLevelDatabase {
 
   store() {
     console.log(`store the database to disk`);
-    if (this.dirty) {
+    if (this.dirty) {    
       // TODO implement
+      this.homeConfig.report();
       this.dirty = false;
     }
   }
