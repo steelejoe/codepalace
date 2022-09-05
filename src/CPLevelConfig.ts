@@ -4,26 +4,93 @@
 
 import fs from 'fs';
 
+enum CPAreaType {
+  Home = 0,
+  Castle,
+  Library,
+  Forest,
+  Lake,
+  Mountain,
+  Desert
+}
 class CPLevelConfig {
-    type: string;
+    parent?: CPLevelConfig;
+    areaType: CPAreaType;
     path: string;
     map: string;
-    npcs: [];
-    monsters: [];
-    items: [];
-    areas: []; // CPLevelConfig
+    npcs = [];
+    monsters = [];
+    items = [];
+    areas = new Array<CPLevelConfig>();
 
-  constructor(path: string, type: string) {
-    this.type = type;
+  constructor(parent?: CPLevelConfig) {
+    this.parent = parent;
+  }
+
+  fullPath(): string {
+    const pathSegments = [ this.path ];
+    let current = this.parent;
+    while (current) {
+      pathSegments.push(current.path);
+      current = current.parent;
+    }
+    pathSegments.reverse();
+    return pathSegments.join('/');
+  }
+
+  pickAreaType(): CPAreaType {
+    // TODO implement a random picker
+    return CPAreaType.Castle;
+  }
+
+  generateBaseConfig(path: string, ignoreList: Array<RegExp>) {
     this.path = path;
-    const entries = fs.readdirSync(path, { withFileTypes: true });
+    this.areaType = this.parent ? CPAreaType.Home : this.pickAreaType();
+    const entries = fs.readdirSync(this.fullPath(), { withFileTypes: true });
     entries.forEach(entry => {
-      this.identify(entry);
+      this.generateEntry(entry, ignoreList);
     });
   }
 
-  identify(entry: fs.Dirent) {
-    console.log(`found ${entry.name} of type ${entry.isDirectory() ? 'folder' : 'file'}`);
+  generateEntry(entry: fs.Dirent, ignoreList: Array<RegExp>) {
+    console.log(`found ${entry.name}`);
+
+    // skip special directories
+    if ((entry.name === "." || entry.name === "..") && entry.isDirectory()) {
+      console.log(`==> ${entry.name} was skipped`);
+      return;
+    }
+
+    // skip ignored files
+    let skip = false;
+    ignoreList.forEach(pattern => {
+      if (entry.name.match(pattern)) {
+        console.log(`==> ${entry.name} was ignored`);
+        skip = true;
+      }
+    });
+    if (skip) return;
+
+    // recurse into subfolders
+    if (entry.isDirectory()) {
+      console.log(`==> ${entry.name} is a directory`);
+      const config = new CPLevelConfig(this);
+      this.areas.push(config);
+      config.generateBaseConfig(entry.name, ignoreList);
+      return;
+    }
+    
+}
+
+  load(path: string) {
+    this.path = path;
+    // TODO implement
+    console.log(`load config for ${path} from disk path @ ${this.fullPath()}`);
+  }
+
+  store() {
+    // TODO implement
+    console.log(`store config for ${this.path} to disk @ ${this.fullPath()}`);
   }
 }
 

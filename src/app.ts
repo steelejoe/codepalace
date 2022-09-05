@@ -6,7 +6,6 @@ import chalk from "chalk";
 import commandLineArgs from "command-line-args";
 import commandLineUsage from "command-line-usage";
 import express from "express";
-import { CPLevelConfig } from '../dist/CPLevelConfig.js';
 import { CPLevelDatabase } from '../dist/CPLevelDatabase.js';
 
 /**
@@ -71,14 +70,18 @@ if (options.help) {
 
 const port = options.port;
 const home = process.cwd();
+const database = new CPLevelDatabase(home);
+const ignoreList = [
+    new RegExp('^\\..+')
+];
 
 /**
- *  Scan the file system and generate the game files
+ *  Write the configuration to disk
  */
 
-if (options.install) {
-    const database = new CPLevelDatabase(home, false);
-    // TODO write the configuration to disk!
+ if (options.install) {
+    database.generate(ignoreList);
+    database.store();
     process.exit(1);
 }
 
@@ -87,8 +90,8 @@ if (options.install) {
  */
 
 if (options.start) {
-    // TODO load the configuration from disk
-    const database = new CPLevelDatabase(home, true);
+    database.load();
+
     const app = express();
 
     app.get("/", (req, res) => {
