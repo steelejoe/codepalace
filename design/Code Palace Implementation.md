@@ -47,13 +47,139 @@ Unclear how this will be implemented yet. This might be part of the Server or im
 
 ## Client Interface
 
+### Mouse controls
+
+**None** - keyboard, joy-pad only.
+
 ### Map control
 
 **Q: Should I generate the map once or every time? (what about "Tiled Map Editor"?)**
-If I generate every time, layout changes may cause user confusion. This is a trade-off because the underlying folder contents may have changed and thus would have resulted in a different map if installed now. I think I will generate at install time for now and only make changes when things change type or disappear. E.g. if a folder was deleted, that building will become "dead" but remain on the map (at least for awhile). Same thing with NPCs, items and monsters
+If I generate every time, layout changes may cause user confusion. This is a trade-off because the underlying folder contents may have changed and thus would have resulted in a different map if installed now. I think I will generate at install time for now and only make changes when things change type or disappear. E.g. if a folder was deleted, that building will become "dead" but remain on the map until the engine is restarted. Same thing with NPCs, items and monsters
 
+### Map keyboard controls
 
+WASD and arrow keys for directions. Up and down only make sense when there is a climbing surface (e.g. a ladder).
+E or Enter for interaction. Open a door, talk to an NPC, etc.
+Space to jump
+H to switch to HUD interface
+C to switch to Console interface
 
-### Interaction control
+If I have battling:
 
-### Console control
+- Left button mouse or F for fight
+
+If I have re-architecting:
+
+- X to destroy an element
+- C to add an element
+
+## Map layout
+
+The maps will be 2D platformer maps, with ledges and pits. Falling into a pit means death.
+A background image will scroll along behind the foreground elements.
+Certain items can be suspended in mid air. The player will have to jump (maybe multi-jump) to get to these.
+
+## Enemy behavior
+
+Most objects in the scene will be either items or ambivalent NPCs.
+When entering a scene a random number of NPCs will be marked "aggro".
+If an NPC is "aggro" it will move towards the player when it can and attack.
+"Aggro" NPCs will jump off ledges to come after the player. This can result in their death if there is a pit.
+If any NPC is attacked and has "friends", the friends will become "aggro" and attack.
+Defeated enemies will remain as corpses and become non-interactive. They will be re-spawned on the next play-through.
+If an NPC is non-aggro it can be walked past without interacting (although they may say something).
+You can choose to interact by stopping next to them and choosing the interaction command.
+
+## Item behavior
+
+Items are picked up when the player touches them. Items can be dropped from the inventory.
+
+## "Heads Up Display" aka HUD
+
+There will be two versions of this:
+
+- A minimal non-interactive version displayed as part of the console at the bottom.
+- An interactive version the user can move around it and edit.
+
+The non-interactive HUD will contain:
+
+- Title
+- Experience (as a pie)
+- Num of Items
+- Health (as a pie) (if battling)
+- Num of Enemies defeated (if battling)
+- Current Weapon (icon) (if battling)
+- Current Armor (icon) (if battling)
+
+The interactive HUD will contain:
+
+- Title
+- Experience
+- Items listed by category
+- Overmap
+- Menu (save, quit, settings)
+- Health (if battling)
+- Current Weapon (if battling)
+- Current Armor (if battling)
+- Special attributes (if re-architecting)
+- Debugging information (if debugging)
+
+The interactive HUD will animate when selected, expanding up from the non-interactive HUD.
+
+### HUD keyboard controls
+
+WASD and arrow keys to move around in the interface.
+E or Enter to activate the selected button.
+Esc to exit back to the map.
+
+### Console
+
+The console is for various interactions I didn't want to make specific UI for.
+Talking, editing text, debugging, etc.
+
+### Console keyboard controls
+
+All text editing characters allowed.
+Enter to submit current text.
+Esc to exit back to the map or HUD (depending on where you came from).
+
+## Items
+
+Items will be of various types
+
+- (config files?) food, potions -- these will give health
+- (images, videos, binary assets) gems, coins -- these will give wealth
+- (.md, .log, .txt) scrolls -- these will give experience (maybe skills and/or attributes?)
+- (dropped by NPCs) weapons, armor -- if battling
+- other??
+
+## Writing the maps and entity sets
+
+ The Tiled engine will consume specially constructed map.tsx and tile.tsx files.
+ I will construct those for each level using the images and a text editor.
+
+To build a theme set:
+
+- Collect the set of images
+- Pick your set of objects
+- Make object sets using original image files and parameters
+- Create combined image sets so the Tiled loader can handle it
+
+```ts
+entity: {
+    name: string; // Human readable name
+    id: string; // UUID for references
+    entityGroup: enum;
+    entityType: enum;
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+}
+entitySet: {
+    name: string; // Human readable name
+    id: string; // UUID for references
+    entities: entity[];
+    filename: string; // relative to installation root
+}
+```
