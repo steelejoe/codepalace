@@ -1,3 +1,4 @@
+#!node
 /**
  * This is the main app server
  */
@@ -5,7 +6,7 @@
 import chalk from "chalk";
 import commandLineArgs from "command-line-args";
 import commandLineUsage from "command-line-usage";
-import express from "express";
+import { fastify } from 'fastify';
 import { CPLevelDatabase } from '../dist/CPLevelDatabase.js';
 import { CPLevelMapping } from "./CPLevelMapping.js";
 
@@ -91,7 +92,7 @@ const mapping = new CPLevelMapping();
 if (options.start) {
     database.load();
 
-    const app = express();
+    const app = fastify();
 
     app.get("/", (req, res) => {
         res.send("This ... is ... Code Palace!!!");

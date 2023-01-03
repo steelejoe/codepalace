@@ -8,7 +8,8 @@ import { CPLevelMapping } from "./CPLevelMapping";
 
 const verbose = false;
 
-enum CPAreaType {
+// Each of these types corresponds to different tileset
+export enum CPAreaType {
     Home = 0,
     Castle,
     Library,
@@ -18,13 +19,14 @@ enum CPAreaType {
     Desert,
 }
 
-enum CPEntryType {
+// Each of these types corresponds to an interactive entity
+export enum CPEntityType {
     NPC,
     Monster,
-    Item,
+    Item
 }
 
-class CPLevelConfig {
+export class CPLevelConfig {
     parent?: CPLevelConfig;
     areaType: CPAreaType;
     path: string;
@@ -54,6 +56,7 @@ class CPLevelConfig {
         return CPAreaType.Castle;
     }
 
+    // TODO this code does not take into account an existing level config
     generateBaseConfig(path: string, mapping: CPLevelMapping) {
         this.path = path;
         this.areaType = this.parent ? CPAreaType.Home : this.pickAreaType();
@@ -87,6 +90,7 @@ class CPLevelConfig {
         });
         if (skip) return;
 
+        // TODO I don't think we want to do this yet
         // recurse into subfolders
         if (entry.isDirectory()) {
             if (verbose) console.log(`==> ${entry.name} is a directory`);
@@ -137,5 +141,3 @@ class CPLevelConfig {
         );
     }
 }
-
-export { CPLevelConfig };

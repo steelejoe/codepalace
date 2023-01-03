@@ -1,5 +1,11 @@
 # Code Palace Future Thinking
 
+## Game engine
+
+I have picked [MelonJS](https://melonjs.org) for now because I need to run in the browser.
+Is that possible with [Unity](https://unity.com)? [Yes](https://stackoverflow.com/questions/37720559/how-to-run-unity-game-on-browser)
+Is Unity better for this? Maybe?
+
 ## Lazy map generation
 
 I want the map to be lazily generated once the player enters that scene. If it has already been generated, the system should use the map already there. The maps should be 2d with ledges and I will have a multi-jumping mechanism.
@@ -21,7 +27,7 @@ Interaction sounds? YES
 - opening
 - picking up
 - battling
-
+T
 Environmental music? maybe?
 BOSS music? Yes, if I have bosses.
 
@@ -75,10 +81,9 @@ I think a simple inventory is good. I will have a heads up display the player ca
 Should players die? YES
 
 - Death will result in the scene resetting, losing any items from the current, and losing some percentage of their items.
-  - Certainly anythin
+  - Certainly anything gained in the level
 
 Should players kill monsters?
-
 
 Should there be battles?
 
@@ -92,4 +97,13 @@ Should there be battles?
 Should NPCs have conversations? NO - don't want that much complexity
 
 - They _may_ say stuff when they meet you and that is it. You cannot respond.
+
+## Generating maps
+
+The map will be (width of screen) x 0.2 x (number of entities + doors) with a minimum map size of 1 screen width.
+
+### Generation Affinity
+
+When generating maps, certain entities have an "affinity" for each other and any algorithm placing them should take this account.
+When interacting with a group of items in affinity with each other, they should be placed in the same "closeup" scene together.
 
