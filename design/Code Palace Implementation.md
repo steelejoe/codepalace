@@ -13,6 +13,17 @@ These are the high level components that Code Palace is built from.
 This scans the code base for known file system entities and creates the initial configuration.
 Some things will be randomized at this point. Some questions may be asked about what types of metadata to support.
 
+The map generation process looks roughly like this:
+
+- Determine map grid size (small, medium, large) based on the number of elements
+- Determine map theme based on the types of elements and depth
+- Place portals randomly in the grid
+- Place seed tiles for each portal
+- Generate the map based on the seed tiles and the rules on tile placement
+- Stitch the tiles together (cleanup borders, connect paths, etc.)
+- Place the items
+- Place the npcs
+
 ### Client
 
 This is the interface provided for navigating the game. This is implemented as a React app.. The app relies on APIs which are provided by the Server.
@@ -55,6 +66,12 @@ Unclear how this will be implemented yet. This might be part of the Server or im
 
 **Q: Should I generate the map once or every time? (what about "Tiled Map Editor"?)**
 If I generate every time, layout changes may cause user confusion. This is a trade-off because the underlying folder contents may have changed and thus would have resulted in a different map if installed now. I think I will generate at install time for now and only make changes when things change type or disappear. E.g. if a folder was deleted, that building will become "dead" but remain on the map until the engine is restarted. Same thing with NPCs, items and monsters
+
+**Q: How deep should I iterate**
+I will need to iterate at least one layer deeper than the user is in order to generate the correct imagery.
+Each time the users descends a level I will need to make sure I know the contents of the next layer down.
+For a large folder hierarchy the report could grow quite large, so this is really just for debugging. Probably that won't even work at some point.
+HOw should I be tracking this? I know where the user is - so that should be my limiting factor.
 
 ### Map keyboard controls
 

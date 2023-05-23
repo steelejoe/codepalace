@@ -81,7 +81,8 @@ const mapping = new CPLevelMapping();
 
  if (options.install) {
     database.generate(mapping);
-    database.store();
+    console.log(database.homeConfig.report());
+    //database.store();
     process.exit(1);
 }
 

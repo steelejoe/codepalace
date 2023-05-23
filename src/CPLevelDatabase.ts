@@ -8,40 +8,39 @@ import { CPLevelMapping } from './CPLevelMapping.js';
 class CPLevelDatabase {
     dirty = false;
     homePath: string;
-    homeConfig?: CPLevelConfig = undefined;
+    homeConfig?: CPLevelConfig;
 
   constructor(homePath: string) {
     this.homePath = homePath;
   }
 
   generate(mapping: CPLevelMapping) {
-    this.homeConfig = new CPLevelConfig(undefined);
-    this.homeConfig.generateBaseConfig(this.homePath, mapping);
+    this.homeConfig = new CPLevelConfig();
+    this.homeConfig.generateBaseConfig(this.homePath, mapping, 0);
     // TODO apply more complex metadata to the base config
     this.dirty = true;
   }
 
-  load(): CPLevelConfig|undefined {
+  load() {
     console.log(`load the database from disk`);
-    // TODO implement
     this.dirty = false;
+    this.homeConfig.load();
   }
 
   store() {
     console.log(`store the database to disk`);
     if (this.dirty) {    
-      // TODO implement
-      this.homeConfig.report();
+      this.homeConfig.store();
       this.dirty = false;
     }
   }
 
-  getConfig(path: string) : CPLevelConfig | undefined {
+  getConfig(_path: string) : CPLevelConfig | undefined {
     // TODO implement
     return undefined;
   }
 
-  setConfig(path: string, config: CPLevelConfig) {
+  setConfig(_path: string, _config: CPLevelConfig) {
     // TODO implement
     this.dirty = true;
   }

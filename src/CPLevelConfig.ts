@@ -10,20 +10,20 @@ const verbose = false;
 
 // Each of these types corresponds to different tileset
 export enum CPAreaType {
-    Home = 0,
-    Castle,
-    Library,
-    Forest,
-    Lake,
-    Mountain,
-    Desert,
+    Home = "Home",
+    Castle = "Castle",
+    Library = "Library",
+    Forest = "Forest",
+    Lake = "Lake",
+    Mountain = "Mountain",
+    Desert = "Desert",
 }
 
 // Each of these types corresponds to an interactive entity
 export enum CPEntityType {
-    NPC,
-    Monster,
-    Item
+    NPC = "NPC",
+    Monster = "Monster",
+    Item = "Item",
 }
 
 export class CPLevelConfig {
@@ -57,18 +57,19 @@ export class CPLevelConfig {
     }
 
     // TODO this code does not take into account an existing level config
-    generateBaseConfig(path: string, mapping: CPLevelMapping) {
+    // TODO as the user moves deeper into the map, this will be called with a depth of 0
+    generateBaseConfig(path: string, mapping: CPLevelMapping, depth: number) {
         this.path = path;
-        this.areaType = this.parent ? CPAreaType.Home : this.pickAreaType();
+        this.areaType = this.parent ? this.pickAreaType() : CPAreaType.Home;
         const entries = fs.readdirSync(this.fullPath(), {
             withFileTypes: true,
         });
         entries.forEach((entry) => {
-            this.generateEntry(entry, mapping);
+            this.generateEntry(entry, mapping, depth);
         });
     }
 
-    generateEntry(entry: fs.Dirent, mapping: CPLevelMapping) {
+    generateEntry(entry: fs.Dirent, mapping: CPLevelMapping, depth: number) {
         if (verbose) console.log(`found ${entry.name}`);
 
         // skip special directories
@@ -81,22 +82,19 @@ export class CPLevelConfig {
         }
 
         // skip ignored files
-        let skip = false;
         mapping.ignore.forEach((pattern) => {
             if (entry.name.match(pattern)) {
                 if (verbose) console.log(`==> ${entry.name} was ignored`);
-                skip = true;
+                return;
             }
         });
-        if (skip) return;
 
-        // TODO I don't think we want to do this yet
         // recurse into subfolders
-        if (entry.isDirectory()) {
+        if (entry.isDirectory() && depth < 2) {
             if (verbose) console.log(`==> ${entry.name} is a directory`);
             const config = new CPLevelConfig(this);
             this.areas.push(config);
-            config.generateBaseConfig(entry.name, mapping);
+            config.generateBaseConfig(entry.name, mapping, depth + 1);
             return;
         }
 
@@ -111,19 +109,29 @@ export class CPLevelConfig {
         }
     }
 
-    report() {
-        console.log(`{
-  path: ${this.path},
-  areaType: ${this.areaType},
-  numNPCs: ${this.npcs.length},
-  numMonsters: ${this.monsters.length},
-  numItems: ${this.items.length},
-  areas: [`);
-        this.areas.forEach((area) => area.report());
-        console.log(`
-  ]
-}`
-      );
+    reportAreas() : string {
+        let output = `[`;
+        if (this.areas.length > 0) {
+            this.areas.forEach((area) => {
+                output += area.report();
+                output += ",";
+            });
+            output = output.substring(0, output.length - 1);
+        }
+        output += `]`;
+        return output;
+    }
+
+    report() : string {
+        let output = `{`;
+        output += `path: "${this.fullPath()}",`;
+        output += `areaType: ${JSON.stringify(this.areaType)},`;
+        output += `numNPCs: ${this.npcs.length},`;
+        output += `numMonsters: ${this.monsters.length},`;
+        output += `numItems: ${this.items.length},`;
+        output += `areas: ${this.reportAreas()}`;
+        output += `}`;
+        return output;
     }
 
     load(path: string) {
